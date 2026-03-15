@@ -7,7 +7,7 @@ import Login from "./auth/Login/Login";
 import Register from "./auth/Register/Register";
 import Home from "./Pages/Home";
 import Profile from "./Pages/Profile";
-import SinglePost from "./Pages/SinglePost";
+import SinglePost from "./Pages/singlePost";
 import Notifications from "./Pages/Notifications";
 import ChangePassword from "./Pages/ChangePassword";
 import NotFound from "./Pages/NotFound";
