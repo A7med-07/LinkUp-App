@@ -1,162 +1,127 @@
 import {
-  Navbar as HeroNav,
-  NavbarBrand,
-  NavbarContent,
-  NavbarItem,
-  NavbarMenu,
-  NavbarMenuItem,
-  NavbarMenuToggle,
-  Link,
-  DropdownItem,
-  DropdownTrigger,
-  Dropdown,
-  DropdownMenu,
-  Avatar,
+  Navbar as HeroNav, NavbarBrand, NavbarContent, NavbarItem,
+  NavbarMenu, NavbarMenuItem,
+  Dropdown, DropdownItem, DropdownTrigger, DropdownMenu,
 } from "@heroui/react";
-
-import img from '../../../src/assets/link.jpg'
 import { NavLink, useNavigate } from "react-router-dom";
-import { AuthContext } from "../../context/authContext";
 import { useContext, useState } from "react";
-import { Home, User, MessageCircle , Video} from 'lucide-react'
+import { AuthContext } from "../../context/authContext";
+import { Home, User, Bell, Settings, LogOut, Users, Menu, X, Sun, Moon } from "lucide-react";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  let navigate = useNavigate();
-  
-  function LogOut() {
-    localStorage.removeItem('token');
+  const navigate = useNavigate();
+  const { setuserToken, setuserData, userData, toggleDarkMode, darkMode } = useContext(AuthContext);
+
+  function handleLogout() {
+    localStorage.removeItem("token");
     setuserToken(null);
     setuserData(null);
-    navigate('/');
+    navigate("/");
   }
 
-  const { userToken, setuserToken, userData, setuserData } = useContext(AuthContext);
-
-  const menuItems = [
-    { name: "Home", path: "/home", icon: <Home className="w-5 h-5" /> },
-    { name: "Profile", path: "/profile", icon: <User className="w-5 h-5" /> },
-    { name: "Chat", path: "#", icon: <MessageCircle className="w-5 h-5" /> },
-    { name: "Reels", path: "#", icon: <Video className="w-5 h-5" /> },
+  const navItems = [
+    { name: "Feed", path: "/home", icon: <Home className="w-4 h-4" /> },
+    { name: "Profile", path: "/profile", icon: <User className="w-4 h-4" /> },
+    { name: "Notifications", path: "/notifications", icon: <Bell className="w-4 h-4" /> },
+    { name: "Suggestions", path: "/suggestions", icon: <Users className="w-4 h-4" /> },
   ];
 
   return (
-    <HeroNav 
-      className="bg-[#1a1f2e] border-b border-gray-800 shadow-xl fixed top-0 left-0 right-0 z-50" 
-      maxWidth="full"
-      isMenuOpen={isMenuOpen}
-      onMenuOpenChange={setIsMenuOpen}
+    <HeroNav
+      className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm fixed top-0 z-50"
+      maxWidth="full" isMenuOpen={isMenuOpen} onMenuOpenChange={setIsMenuOpen}
     >
-      {/* Mobile Menu Toggle */}
-      <NavbarContent className="md:hidden" justify="start">
-        <NavbarMenuToggle
-          aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-          className="text-gray-400 hover:text-white"
-        />
-      </NavbarContent>
-
-      {/* Logo - Mobile */}
-      <NavbarContent className="md:hidden pr-3" justify="center">
+      {/* Brand */}
+      <NavbarContent justify="start">
+        <button onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="md:hidden p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all mr-1">
+          {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
         <NavbarBrand>
-          <div className="flex items-center gap-2 text-2xl font-semibold">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 via-purple-500 to-orange-400 text-white font-bold text-lg shadow-lg">
-              L
-            </span>
-            <span className="text-white">LinkUp</span>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-blue-700 flex items-center justify-center text-white font-bold text-xs">L</div>
+            <span className="font-bold text-gray-900 dark:text-white sm:block">LinkUp</span>
           </div>
         </NavbarBrand>
       </NavbarContent>
 
-      {/* Logo - Desktop */}
-      <NavbarContent className="hidden md:flex gap-4" justify="start">
-        <NavbarBrand>
-          <div className="flex items-center gap-3 text-4xl font-semibold">
-            <span className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 via-purple-500 to-orange-400 text-white font-bold shadow-xl">
-              L
-            </span>
-            <span className="text-white">LinkUp</span>
-          </div>
-        </NavbarBrand>
+      {/* Desktop Nav */}
+      <NavbarContent className="hidden md:flex" justify="center">
+        <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-full px-2 py-1">
+          {navItems.map((item) => (
+            <NavbarItem key={item.name}>
+              <NavLink to={item.path}
+                className={({ isActive }) =>
+                  `flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                    isActive
+                      ? "bg-white dark:bg-gray-900 text-blue-600 shadow-sm"
+                      : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                  }`
+                }>
+                {item.icon}
+                <span className="hidden lg:block">{item.name}</span>
+              </NavLink>
+            </NavbarItem>
+          ))}
+        </div>
       </NavbarContent>
 
-      {/* Navigation Links - Desktop */}
-      <NavbarContent className="hidden md:flex gap-8" justify="center">
-        {menuItems.map((item, index) => (
-          <NavbarItem key={index}>
-            <NavLink
-              className={({isActive}) => `flex flex-col items-center justify-center text-center gap-1 transition-all duration-300 ${
-                isActive 
-                ? 'text-white' 
-                : 'text-gray-400 hover:text-white'
-              }`}
-              to={item.path}
-            >
-              {item.icon}
-              <span className="text-xs font-medium uppercase tracking-wide">{item.name}</span>
-            </NavLink>
-          </NavbarItem>
-        ))}
-      </NavbarContent>
-
-      {/* User Avatar */}
+      {/* User Menu */}
       <NavbarContent justify="end">
-        <Dropdown placement="bottom-end" className="p-0">
-          <DropdownTrigger >
-            <Avatar
-              isBordered
-              as="button"
-              className="transition-transform hover:scale-110"
-              color="secondary"
-              size="sm"
-              src={userData?.photo}
-            />
+        <span className="text-sm font-medium text-gray-700 dark:text-gray-300 hidden lg:block">
+          {userData?.name}
+        </span>
+        <Dropdown placement="bottom-end">
+          <DropdownTrigger>
+            <button className="flex items-center gap-1 outline-none">
+              <img src={userData?.photo}
+                onError={(e) => { e.target.src = "https://pub-3cba56bacf9f4965bbb0989e07dada12.r2.dev/linkedPosts/default-profile.png"; }}
+                className="w-8 h-8 rounded-full object-cover cursor-pointer" alt="avatar" />
+              <span className="text-gray-400 hidden sm:block">▾</span>
+            </button>
           </DropdownTrigger>
-
-          <DropdownMenu aria-label="Auth Actions" variant="flat" className="bg-[#1a1f2e] border border-gray-800 p-0">
-            <DropdownItem 
-              key="login" 
-              onClick={() => navigate('/')}
-              className="text-gray-300 hover:text-white hover:bg-gray-800"
-            >
-              Login
+          <DropdownMenu className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-lg rounded-xl min-w-[160px]">
+            <DropdownItem key="profile" onClick={() => navigate("/profile")}
+              startContent={<User className="w-4 h-4 text-gray-500" />}
+              className="text-gray-700 dark:text-gray-200">Profile</DropdownItem>
+            <DropdownItem key="settings" onClick={() => navigate("/change-password")}
+              startContent={<Settings className="w-4 h-4 text-gray-500" />}
+              className="text-gray-700 dark:text-gray-200">Settings</DropdownItem>
+            <DropdownItem key="dark-mode" onClick={toggleDarkMode}
+              startContent={darkMode ? <Sun className="w-4 h-4 text-gray-500" /> : <Moon className="w-4 h-4 text-gray-500" />}
+              className="text-gray-700 dark:text-gray-200">
+              {darkMode ? "Light Mode" : "Dark Mode"}
             </DropdownItem>
-            <DropdownItem 
-              key="register" 
-              onClick={() => navigate('/register')}
-              className="text-gray-300 hover:text-white hover:bg-gray-800"
-            >
-              Register
-            </DropdownItem>
-            <DropdownItem 
-              onClick={LogOut} 
-              key="logout" 
-              color="danger"
-              className="text-red-400"
-            >
-              Log Out : {userData?.name}
-            </DropdownItem>
+            <DropdownItem key="logout" onClick={handleLogout}
+              startContent={<LogOut className="w-4 h-4 text-red-500" />}
+              className="text-red-500">Logout</DropdownItem>
           </DropdownMenu>
         </Dropdown>
       </NavbarContent>
 
       {/* Mobile Menu */}
-      <NavbarMenu className="bg-[#1a1f2e] border-r border-gray-800 pt-6">
-        {menuItems.map((item, index) => (
-          <NavbarMenuItem key={`${item.name}-${index}`}>
-            <NavLink
-              className={({isActive}) => `w-full flex items-center gap-3 py-3 px-4 text-lg rounded-lg transition-all duration-300 ${
-                isActive 
-                ? 'text-white bg-gradient-to-r from-purple-600/20 to-blue-600/20 border-l-4 border-purple-500' 
-                : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
-              }`}
-              to={item.path}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              {item.icon}
-              <span>{item.name}</span>
+      <NavbarMenu className="bg-white dark:bg-gray-900 pt-4">
+        {navItems.map((item) => (
+          <NavbarMenuItem key={item.name}>
+            <NavLink to={item.path} onClick={() => setIsMenuOpen(false)}
+              className={({ isActive }) =>
+                `flex items-center gap-3 py-3 px-4 rounded-lg text-base ${
+                  isActive
+                    ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20"
+                    : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                }`
+              }>
+              {item.icon} {item.name}
             </NavLink>
           </NavbarMenuItem>
         ))}
+        <NavbarMenuItem>
+          <button onClick={handleLogout}
+            className="flex items-center gap-3 py-3 px-4 rounded-lg text-base text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 w-full">
+            <LogOut className="w-4 h-4" /> Logout
+          </button>
+        </NavbarMenuItem>
       </NavbarMenu>
     </HeroNav>
   );

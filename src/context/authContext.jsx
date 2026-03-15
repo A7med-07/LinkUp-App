@@ -1,31 +1,48 @@
 import { createContext, useEffect, useState } from "react";
-import { getLoggedUser } from "../services/loginApi";
+import { getLoggedUser } from "../services/api";
 
-export const AuthContext= createContext()
+export const AuthContext = createContext();
 
-export function AuthContextProvider(props){
-const [userToken, setuserToken] = useState(null)
-const [userData, setuserData] = useState(null)
+export function AuthContextProvider({ children }) {
+  const [userToken, setuserToken] = useState(null);
+  const [userData, setuserData] = useState(null);
 
-async function getUser(){
-const response =  await getLoggedUser()
-console.log(response);
-if(response.message === 'success'){
-    setuserData(response.user)
-}
-
-}
-
-
-useEffect(()=>{
-    if(localStorage.getItem('token')!=null){
-        setuserToken(localStorage.getItem('token'))
-        getUser()
+  async function getUser() {
+    const response = await getLoggedUser();
+    if (response?.data?.user) {
+      setuserData(response.data.user);
     }
-},[])
+  }
+
+  useEffect(() => {
+    const t = localStorage.getItem("token");
+    if (t) {
+      setuserToken(t);
+      getUser();
+    }
+  }, []);
 
 
-    return <AuthContext.Provider value={{userToken , setuserToken , userData, setuserData}}>
-{props.children}
+
+
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem("theme") === "dark");
+
+function toggleDarkMode() {
+  const newMode = !darkMode;
+  setDarkMode(newMode);
+  localStorage.setItem("theme", newMode ? "dark" : "light");
+  document.documentElement.classList.toggle("dark", newMode);
+}
+
+useEffect(() => {
+  if (localStorage.getItem("theme") === "dark") {
+    document.documentElement.classList.add("dark");
+  }
+}, []);
+
+  return (
+    <AuthContext.Provider value={{ userToken, setuserToken, userData, setuserData , darkMode, toggleDarkMode }}>
+      {children}
     </AuthContext.Provider>
+  );
 }

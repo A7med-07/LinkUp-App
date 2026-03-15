@@ -1,115 +1,62 @@
-import React, { useState } from 'react'
-import { 
-  Dropdown, 
-  DropdownTrigger, 
-  DropdownMenu, 
-  DropdownItem, 
-  Button, 
-  Spinner, 
-  Modal, 
-  ModalContent, 
-  ModalHeader, 
-  ModalBody, 
-  ModalFooter, 
-  Input,
-  useDisclosure 
-} from "@heroui/react";
-import { DeleteMyComment, updateMyComment } from '../../services/commentApi';
-import { MoreVertical } from 'lucide-react';
+import { useState } from "react";
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Input, useDisclosure } from "@heroui/react";
+import { MoreHorizontal } from "lucide-react";
+import { updateComment, deleteComment } from "../../services/api";
 
-export default function CommentDropDown({ CommentId, callback }) {
-  const [isLoading, setisLoading] = useState(false);
-  const [newContent, setNewContent] = useState(""); 
+export default function CommentDropDown({ commentId, postId, callback }) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [content, setContent] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  async function deleteComment() {
-    setisLoading(true)
-    const response = await DeleteMyComment(CommentId)
-    if (response.message === 'success') { 
-      await callback()
-    }
-    setisLoading(false)
+  async function handleDelete() {
+    const response = await deleteComment(postId, commentId);
+    if (response?.success || response?.message === "success") callback();
   }
 
- 
   async function handleUpdate() {
-    setisLoading(true);
-    const response = await updateMyComment(CommentId, newContent);
-    
-    if (response.message === 'success') {
-      await callback(); 
-      onOpenChange(false); 
-      setNewContent(""); 
+    setIsLoading(true);
+    const response = await updateComment(postId, commentId, content);
+    if (response?.success || response?.message === "success") {
+      await callback();
+      onOpenChange(false);
+      setContent("");
     }
-    setisLoading(false);
+    setIsLoading(false);
   }
 
   return (
     <>
-      <Dropdown className='p-0'>
+      <Dropdown>
         <DropdownTrigger>
-          <Button className='bg-transparent text-gray-400 hover:text-white hover:bg-gray-800/50 p-2 min-w-0 rounded-lg transition-all'>
-            <MoreVertical className="w-5 h-5" />
-          </Button>
+          <button className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
+            <MoreHorizontal className="w-4 h-4" />
+          </button>
         </DropdownTrigger>
-        <DropdownMenu aria-label="Comment Actions" className="bg-[#1a1f2e] border border-gray-800">
-          <DropdownItem 
-            onClick={onOpen} 
-            key="edit"
-            className="text-gray-300 hover:text-white hover:bg-gray-800"
-          >
-            Update Comment
-          </DropdownItem>
-          
-          <DropdownItem 
-            onClick={deleteComment} 
-            key="delete" 
-            className="text-danger" 
-            color="danger"
-          >
-            {isLoading ? <Spinner size="sm" color="current" /> : 'Delete Comment'}
-          </DropdownItem>
+        <DropdownMenu className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-lg rounded-xl">
+          <DropdownItem key="edit" onPress={onOpen} className="text-gray-700 dark:text-gray-200">Edit</DropdownItem>
+          <DropdownItem key="delete" onPress={handleDelete} className="text-red-500" color="danger">Delete</DropdownItem>
         </DropdownMenu>
       </Dropdown>
 
-     
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange} placement="top-center" className="bg-[#1a1f2e]">
-        <ModalContent>
+      <Modal isOpen={isOpen} onOpenChange={onOpenChange} placement="center">
+        <ModalContent className="bg-white dark:bg-gray-900">
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1 text-white border-b border-gray-800">
-                Edit Your Comment
+              <ModalHeader className="text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-700">
+                Edit Comment
               </ModalHeader>
-              <ModalBody className="py-6">
-                <Input
-                  autoFocus
-                  label="Comment"
-                  placeholder="Enter your new comment"
-                  variant="bordered"
-                  value={newContent}
-                  onChange={(e) => setNewContent(e.target.value)}
+              <ModalBody>
+                <Input autoFocus label="Comment" value={content}
+                  onChange={(e) => setContent(e.target.value)} variant="bordered"
                   classNames={{
-                    input: "bg-[#242938] text-gray-200",
-                    inputWrapper: "bg-[#242938] border-gray-700 hover:border-purple-500 focus-within:border-purple-500"
+                    input: "dark:bg-gray-800 dark:text-red-500",
+                    inputWrapper: "dark:border-gray-600",
                   }}
                 />
               </ModalBody>
-              <ModalFooter>
-                <Button 
-                  color="danger" 
-                  variant="flat" 
-                  onPress={onClose}
-                  className="text-gray-400 hover:text-white"
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  onPress={handleUpdate}
-                  isLoading={isLoading}
-                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
-                >
-                  Save Changes
-                </Button>
+              <ModalFooter className="border-t border-gray-100 dark:border-gray-700">
+                <Button variant="light" onPress={onClose} className="text-gray-500 dark:text-gray-400">Cancel</Button>
+                <Button isLoading={isLoading} onPress={handleUpdate} className="bg-blue-600 text-white">Save</Button>
               </ModalFooter>
             </>
           )}
